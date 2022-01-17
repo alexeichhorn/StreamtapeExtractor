@@ -7,8 +7,14 @@ final class StreamtapeExtractorTests: XCTestCase {
         return try await StreamtapeExtractor.extract(fromURL: videoURL)
     }
     
-    func testUnavailableURL() {
-        
+    func testUnavailableURL() async {
+        let unavailableURL = URL(string: "https://streamtape.com/e/kLdy3ajlZktOvx1")!
+        do {
+            let url = try await testSourceURL(unavailableURL)
+            XCTFail("didn't throw. Returned \(url)")
+        } catch {
+            return
+        }
     }
     
     func testBunnyVideo() async throws {
@@ -19,7 +25,7 @@ final class StreamtapeExtractorTests: XCTestCase {
         print("extracted \(url) for bunny video")
     }
     
-    func testHTMLExtraction() {
+    func testHTMLExtraction() throws {
         let html = """
         <div class="plyr-container">
             <div class="plyr-overlay"></div>
@@ -45,7 +51,7 @@ final class StreamtapeExtractorTests: XCTestCase {
             </script>
         """
         
-        let url = StreamtapeExtractor.extractRedirectURL(fromHTML: html)
+        let url = try StreamtapeExtractor.extractRedirectURL(fromHTML: html)
         
         XCTAssertEqual(url, URL(string: "https://streamtape.com/get_video?id=kLdy1xjlZktOvx1&expires=1642504822&ip=GxMsD0SQKxSHDN&token=0Dre-3bspk48")!)
     }
