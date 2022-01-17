@@ -37,7 +37,7 @@ public struct StreamtapeURLSession {
         self.handleRequest = handleRequest
     }
     
-    public init(handleRequest: @escaping ((Request, (Result<Response, Error>) -> Void) -> Void)) {
+    public init(handleRequest: @escaping ((Request, @escaping (Result<Response, Error>) -> Void) -> Void)) {
         self.handleRequest = { req in
             try await withCheckedThrowingContinuation { continuation in
                 handleRequest(req) { result in
