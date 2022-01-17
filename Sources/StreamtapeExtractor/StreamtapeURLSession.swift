@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if os(Linux)
+import FoundationNetworking
+#endif
 
 /// used to wrap url connection methods and inject into `StreamtapeExtractor`
 @available(iOS 13.0, watchOS 6.0, tvOS 13.0, macOS 10.15, *)
