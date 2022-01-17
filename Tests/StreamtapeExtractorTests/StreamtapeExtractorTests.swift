@@ -58,7 +58,11 @@ final class StreamtapeExtractorTests: XCTestCase {
             </script>
         """
         
+        #if os(Linux)
+        let url = try StreamtapeExtractor(urlSession: StreamtapeURLSession { _ in fatalError() }).extractRedirectURL(fromHTML: html)
+        #else
         let url = try StreamtapeExtractor.default.extractRedirectURL(fromHTML: html)
+        #endif
         
         XCTAssertEqual(url, URL(string: "https://streamtape.com/get_video?id=kLdy1xjlZktOvx1&expires=1642504822&ip=GxMsD0SQKxSHDN&token=0Dre-3bspk48")!)
     }
