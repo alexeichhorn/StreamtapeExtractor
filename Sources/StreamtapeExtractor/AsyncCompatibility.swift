@@ -7,6 +7,9 @@
 
 import Foundation
 
+
+#if !os(Linux)
+
 /// Backward compatibility of iOS 15 URLSession async function for older versions
 @available(iOS, introduced: 13.0, deprecated: 15.0, message: "Use system functions instead")
 @available(tvOS, introduced: 13.0, deprecated: 15.0, message: "Use system functions instead")
@@ -43,3 +46,5 @@ extension URLSession {
     }
     
 }
+
+#endif
