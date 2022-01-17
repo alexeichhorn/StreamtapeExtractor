@@ -17,14 +17,19 @@ public struct StreamtapeURLSession {
     let handleRequest: ((Request) async throws -> Response)
     
     public struct Request {
-        let url: URL
-        var httpMethod = "get"
-        var headers: [String: String] = [:]
+        public let url: URL
+        public var httpMethod = "get"
+        public var headers: [String: String] = [:]
     }
     
     public struct Response {
-        let data: Data
-        let url: URL?
+        public let data: Data
+        public let url: URL?
+        
+        public init(data: Data, url: URL?) {
+            self.data = data
+            self.url = url
+        }
     }
     
     
@@ -42,6 +47,7 @@ public struct StreamtapeURLSession {
         }
     }
     
+    #if !os(Linux)
     
     public static var `default`: StreamtapeURLSession {
         StreamtapeURLSession { request in
@@ -55,4 +61,5 @@ public struct StreamtapeURLSession {
         }
     }
     
+    #endif
 }
