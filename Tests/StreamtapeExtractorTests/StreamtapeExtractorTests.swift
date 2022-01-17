@@ -7,10 +7,8 @@ final class StreamtapeExtractorTests: XCTestCase {
     func testSourceURL(_ videoURL: URL) async throws -> URL {
         return try await StreamtapeExtractor.default.extract(fromURL: videoURL)
     }
-    #endif
     
     func testUnavailableURL() async {
-        #if !os(Linux)
         let unavailableURL = URL(string: "https://streamtape.com/e/kLdy3ajlZktOvx1")!
         do {
             let url = try await testSourceURL(unavailableURL)
@@ -18,19 +16,17 @@ final class StreamtapeExtractorTests: XCTestCase {
         } catch {
             return
         }
-        #endif
     }
     
     func testBunnyVideo() async throws {
-        #if !os(Linux)
         let url = try await testSourceURL(URL(string: "https://streamtape.com/e/kLdy1xjlZktOvx1")!)
         
         XCTAssert(url.path.hasSuffix(".mp4"))
         XCTAssertFalse(url.path.contains("do_not_delete"))
         
         print("extracted \(url) for bunny video")
-        #endif
     }
+    #endif
     
     func testHTMLExtraction() throws {
         let html = """
@@ -68,10 +64,16 @@ final class StreamtapeExtractorTests: XCTestCase {
     }
     
     
+    #if os(Linux)
+    static var allTests = [
+        ("testHTMLExtraction", testHTMLExtraction)
+    ]
+    #else
     static var allTests = [
         ("testUnavailableURL", testUnavailableURL),
         ("testBunnyVideo", testBunnyVideo),
         ("testHTMLExtraction", testHTMLExtraction)
     ]
+    #endif
     
 }
