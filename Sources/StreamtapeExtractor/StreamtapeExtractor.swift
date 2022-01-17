@@ -72,6 +72,9 @@ public class StreamtapeExtractor {
         throw ExtractionError.redirectURLNotFound
     }
     
+    /// extracts direct video url from raw html of Streamtape video page
+    /// - parameter html: HTML of video page on Streamtape
+    /// - returns: video url
     public class func extract(fromHTML html: String) async throws -> URL {
         
         let redirectURL = try extractRedirectURL(fromHTML: html)
@@ -83,7 +86,7 @@ public class StreamtapeExtractor {
         
         request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (_, response) = try await URLSession.shared.data(for: request)
         
         guard let url = response.url else {
             throw ExtractionError.redirectionFailed
@@ -96,6 +99,9 @@ public class StreamtapeExtractor {
         return url
     }
     
+    /// extracts direct video url from standard Streamtape url
+    /// - parameter url: Streamtape url (e.g. https://streamtape.com/e/kLdy1xjdZktKvx1)
+    /// - returns: video url
     public class func extract(fromURL url: URL) async throws -> URL {
         
         var request = URLRequest(url: url)
