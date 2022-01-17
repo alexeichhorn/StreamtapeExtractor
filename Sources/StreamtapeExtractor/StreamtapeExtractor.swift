@@ -3,7 +3,15 @@ import Foundation
 @available(iOS 13.0, watchOS 6.0, tvOS 13.0, macOS 10.15, *)
 public class StreamtapeExtractor {
     
-    static let userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36"
+    let userAgent: String
+    let urlSession: StreamtapeURLSession
+    
+    static let `default` = StreamtapeExtractor(urlSession: .default)
+    
+    init(urlSession: StreamtapeURLSession, userAgent: String = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36") {
+        self.urlSession = urlSession
+        self.userAgent = userAgent
+    }
     
     enum ExtractionError: Error {
         case htmlDecodingError
@@ -13,7 +21,7 @@ public class StreamtapeExtractor {
         case disallowedAccessDetected
     }
     
-    class func extractRedirectURL(fromHTML html: String) throws -> URL {
+    func extractRedirectURL(fromHTML html: String) throws -> URL {
         
         let urlPattern = #"<div[^>]+id="robotlink"[^>]*>\/{1,2}(?<url>[a-z]+\.[a-z]+\/[^<\n]+)<\/div>"#
         let urlRegex = try NSRegularExpression(pattern: urlPattern, options: [])
@@ -75,18 +83,16 @@ public class StreamtapeExtractor {
     /// extracts direct video url from raw html of Streamtape video page
     /// - parameter html: HTML of video page on Streamtape
     /// - returns: video url
-    public class func extract(fromHTML html: String) async throws -> URL {
+    public func extract(fromHTML html: String) async throws -> URL {
         
         let redirectURL = try extractRedirectURL(fromHTML: html)
         print(redirectURL)
         
-        var request = URLRequest(url: redirectURL)
+        var request = StreamtapeURLSession.Request(url: redirectURL)
         request.httpMethod = "head"
-        request.addValue(userAgent, forHTTPHeaderField: "User-Agent")
+        request.headers = ["User-Agent": userAgent]
         
-        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
-        
-        let (_, response) = try await URLSession.shared.data(for: request)
+        let response = try await urlSession.handleRequest(request)
         
         guard let url = response.url else {
             throw ExtractionError.redirectionFailed
@@ -102,14 +108,14 @@ public class StreamtapeExtractor {
     /// extracts direct video url from standard Streamtape url
     /// - parameter url: Streamtape url (e.g. https://streamtape.com/e/kLdy1xjdZktKvx1)
     /// - returns: video url
-    public class func extract(fromURL url: URL) async throws -> URL {
+    public func extract(fromURL url: URL) async throws -> URL {
         
-        var request = URLRequest(url: url)
-        request.addValue(userAgent, forHTTPHeaderField: "User-Agent")
+        var request = StreamtapeURLSession.Request(url: url)
+        request.headers = ["User-Agent": userAgent]
         
-        let (data, _) = try await URLSession.shared.data(for: request)
+        let response = try await urlSession.handleRequest(request)
         
-        guard let htmlContent = String(data: data, encoding: .utf8) else {
+        guard let htmlContent = String(data: response.data, encoding: .utf8) else {
             throw ExtractionError.htmlDecodingError
         }
         

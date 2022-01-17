@@ -4,7 +4,7 @@ import XCTest
 final class StreamtapeExtractorTests: XCTestCase {
     
     func testSourceURL(_ videoURL: URL) async throws -> URL {
-        return try await StreamtapeExtractor.extract(fromURL: videoURL)
+        return try await StreamtapeExtractor.default.extract(fromURL: videoURL)
     }
     
     func testUnavailableURL() async {
@@ -52,7 +52,7 @@ final class StreamtapeExtractorTests: XCTestCase {
             </script>
         """
         
-        let url = try StreamtapeExtractor.extractRedirectURL(fromHTML: html)
+        let url = try StreamtapeExtractor.default.extractRedirectURL(fromHTML: html)
         
         XCTAssertEqual(url, URL(string: "https://streamtape.com/get_video?id=kLdy1xjlZktOvx1&expires=1642504822&ip=GxMsD0SQKxSHDN&token=0Dre-3bspk48")!)
     }
