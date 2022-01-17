@@ -20,7 +20,8 @@ final class StreamtapeExtractorTests: XCTestCase {
     func testBunnyVideo() async throws {
         let url = try await testSourceURL(URL(string: "https://streamtape.com/e/kLdy1xjlZktOvx1")!)
         
-        XCTAssertNotNil(url)
+        XCTAssert(url.path.hasSuffix(".mp4"))
+        XCTAssertFalse(url.path.contains("do_not_delete"))
         
         print("extracted \(url) for bunny video")
     }

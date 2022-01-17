@@ -9,6 +9,8 @@ public class StreamtapeExtractor {
         case htmlDecodingError
         case redirectURLNotFound
         case redirectTokenNotFound
+        case redirectionFailed
+        case disallowedAccessDetected
     }
     
     class func extractRedirectURL(fromHTML html: String) throws -> URL {
@@ -50,12 +52,12 @@ public class StreamtapeExtractor {
         let oldTokenPattern = #"token=([A-Za-z0-9-_]*)"#
         let oldTokenRegex = try NSRegularExpression(pattern: oldTokenPattern, options: [])
         
-        if let oldTokenMatch = oldTokenRegex.firstMatch(in: html, options: [], range: NSRange(location: 0, length: html.count)) {
+        if let oldTokenMatch = oldTokenRegex.firstMatch(in: redirectURL, options: [], range: NSRange(location: 0, length: redirectURL.count)) {
             
-            guard let oldTokenRange = Range(oldTokenMatch.range, in: html) else {
+            guard let oldTokenRange = Range(oldTokenMatch.range, in: redirectURL) else {
                 throw ExtractionError.redirectTokenNotFound
             }
-            let oldToken = html[oldTokenRange]
+            let oldToken = redirectURL[oldTokenRange]
             
             redirectURL = redirectURL.replacingOccurrences(of: oldToken, with: "token=\(token)")
             
@@ -73,8 +75,25 @@ public class StreamtapeExtractor {
     public class func extract(fromHTML html: String) async throws -> URL {
         
         let redirectURL = try extractRedirectURL(fromHTML: html)
+        print(redirectURL)
         
-        fatalError()
+        var request = URLRequest(url: redirectURL)
+        request.httpMethod = "head"
+        request.addValue(userAgent, forHTTPHeaderField: "User-Agent")
+        
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let url = response.url else {
+            throw ExtractionError.redirectionFailed
+        }
+        
+        guard !url.path.contains("streamtape_do_not_delete") else {
+            throw ExtractionError.disallowedAccessDetected
+        }
+        
+        return url
     }
     
     public class func extract(fromURL url: URL) async throws -> URL {
