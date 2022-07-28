@@ -1,5 +1,6 @@
 import XCTest
 @testable import StreamtapeExtractor
+import URLSessionWrapper
 
 @available(iOS 13.0, watchOS 6.0, tvOS 13.0, macOS 10.15, *)
 final class StreamtapeExtractorTests: XCTestCase {
@@ -68,7 +69,7 @@ final class StreamtapeExtractorTests: XCTestCase {
         """
         
         #if os(Linux)
-        let url = try StreamtapeExtractor(urlSession: StreamtapeURLSession { _ in fatalError() }).extractRedirectURL(fromHTML: html)
+        let url = try StreamtapeExtractor(urlSession: URLSessionWrapper { _ in fatalError() }).extractRedirectURL(fromHTML: html)
         #else
         let url = try StreamtapeExtractor.default.extractRedirectURL(fromHTML: html)
         #endif
