@@ -2,7 +2,6 @@ import XCTest
 @testable import StreamtapeExtractor
 import URLSessionWrapper
 
-@available(iOS 13.0, watchOS 6.0, tvOS 13.0, macOS 10.15, *)
 final class StreamtapeExtractorTests: XCTestCase {
     
     #if !os(Linux)
