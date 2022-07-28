@@ -1,16 +1,17 @@
 import Foundation
+import URLSessionWrapper
 
 @available(iOS 13.0, watchOS 6.0, tvOS 13.0, macOS 10.15, *)
 public class StreamtapeExtractor {
     
     let userAgent: String
-    let urlSession: StreamtapeURLSession
+    let urlSession: URLSessionWrapper
     
     #if !os(Linux)
     static let `default` = StreamtapeExtractor(urlSession: .default)
     #endif
     
-    public init(urlSession: StreamtapeURLSession, userAgent: String = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36") {
+    public init(urlSession: URLSessionWrapper, userAgent: String = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36") {
         self.urlSession = urlSession
         self.userAgent = userAgent
     }
@@ -91,7 +92,7 @@ public class StreamtapeExtractor {
         let redirectURL = try extractRedirectURL(fromHTML: html)
         print(redirectURL)
         
-        var request = StreamtapeURLSession.Request(url: redirectURL)
+        var request = URLSessionWrapper.Request(url: redirectURL)
         request.httpMethod = "head"
         request.headers = ["User-Agent": userAgent]
         
@@ -113,7 +114,7 @@ public class StreamtapeExtractor {
     /// - returns: video url
     public func extract(fromURL url: URL) async throws -> URL {
         
-        var request = StreamtapeURLSession.Request(url: url)
+        var request = URLSessionWrapper.Request(url: url)
         request.headers = ["User-Agent": userAgent]
         
         let response = try await urlSession.handleRequest(request)
