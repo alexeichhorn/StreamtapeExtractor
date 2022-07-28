@@ -25,10 +25,12 @@ public struct StreamtapeURLSession {
     public struct Response {
         public let data: Data
         public let url: URL?
+        public let statusCode: Int
         
-        public init(data: Data, url: URL?) {
+        public init(data: Data, url: URL?, statusCode: Int) {
             self.data = data
             self.url = url
+            self.statusCode = statusCode
         }
     }
     
@@ -57,7 +59,7 @@ public struct StreamtapeURLSession {
             
             let (data, response) = try await URLSession.shared.data(for: urlRequest)
             
-            return Response(data: data, url: response.url)
+            return Response(data: data, url: response.url, statusCode: (response as? HTTPURLResponse)?.statusCode ?? -1)
         }
     }
     

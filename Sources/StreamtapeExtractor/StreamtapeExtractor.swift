@@ -15,12 +15,13 @@ public class StreamtapeExtractor {
         self.userAgent = userAgent
     }
     
-    enum ExtractionError: Error {
+    public enum ExtractionError: Error {
         case htmlDecodingError
         case redirectURLNotFound
         case redirectTokenNotFound
         case redirectionFailed
         case disallowedAccessDetected
+        case videoDeleted
     }
     
     func extractRedirectURL(fromHTML html: String) throws -> URL {
@@ -116,6 +117,10 @@ public class StreamtapeExtractor {
         request.headers = ["User-Agent": userAgent]
         
         let response = try await urlSession.handleRequest(request)
+        
+        if response.statusCode == 404 {
+            throw ExtractionError.videoDeleted
+        }
         
         guard let htmlContent = String(data: response.data, encoding: .utf8) else {
             throw ExtractionError.htmlDecodingError

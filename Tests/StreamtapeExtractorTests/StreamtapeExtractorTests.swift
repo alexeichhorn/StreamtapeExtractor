@@ -1,6 +1,7 @@
 import XCTest
 @testable import StreamtapeExtractor
 
+@available(iOS 13.0, watchOS 6.0, tvOS 13.0, macOS 10.15, *)
 final class StreamtapeExtractorTests: XCTestCase {
     
     #if !os(Linux)
@@ -10,11 +11,23 @@ final class StreamtapeExtractorTests: XCTestCase {
     
     func testUnavailableURL() async {
         let unavailableURL = URL(string: "https://streamtape.com/e/kLdy3ajlZktOvx1")!
+        
         do {
             let url = try await testSourceURL(unavailableURL)
             XCTFail("didn't throw. Returned \(url)")
-        } catch {
-            return
+        } catch let error {
+            XCTAssertEqual(error as? StreamtapeExtractor.ExtractionError, .videoDeleted)
+        }
+    }
+    
+    func testInvalidURL() async {
+        let invalidURL = URL(string: "https://fakestreamtape.com/e/kLdy3ajlZktOvx1")!
+        
+        do {
+            let url = try await testSourceURL(invalidURL)
+            XCTFail("didn't throw. Returned \(url)")
+        } catch let error {
+            XCTAssert(error is URLError)
         }
     }
     
